@@ -1,19 +1,22 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'dart:math';
+import 'package:hive/hive.dart';
+part 'pessoa.g.dart';
 
-class Pessoa {
+@HiveType(typeId: 1)
+class Pessoa extends HiveObject {
+  @HiveField(0)
   String? nome;
 
-  double resultado;
+  @HiveField(1)
   String? classificacao;
+
   Pessoa({
     this.nome,
-    this.resultado = 0,
     this.classificacao,
   });
 
   calculadora(double p, double a) {
-    resultado = p / (pow(a, 2));
+    final resultado = p / (pow(a, 2));
     switch (resultado) {
       case >= 40:
         classificacao =

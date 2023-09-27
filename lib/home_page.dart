@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:imc_flutter_dio/controller.dart';
-
-import 'pessoa.dart';
+import 'package:flutter_mobx/flutter_mobx.dart';
 
 class HomePage extends StatefulWidget {
-  final ControllerImc controller;
+  final Controller controller;
   const HomePage({super.key, required this.controller});
 
   @override
@@ -12,7 +11,21 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  List<Pessoa> imcs = [];
+  @override
+  void initState() {
+    show();
+    super.initState();
+  }
+  /*   didChangeDependencies() async {
+    show();
+    setState(() {});
+    super.didChangeDependencies();
+  } */
+
+  show() {
+    widget.controller.showList();
+  }
+
   final nome = TextEditingController();
   final peso = TextEditingController();
   final altura = TextEditingController();
@@ -82,22 +95,37 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 16,
             ),
-            Expanded(
-                child: ListView.builder(
-              itemCount: imcs.length,
-              itemBuilder: (context, index) {
-                return Card(
-                  color: Theme.of(context).primaryColor,
-                  child: ListTile(
-                    title: Text(
-                      imcs[index].nome ?? '',
-                      style: const TextStyle(fontSize: 20, color: Colors.white),
-                    ),
-                    trailing: Text(
-                      imcs[index].classificacao ?? '',
-                      style: const TextStyle(fontSize: 16, color: Colors.white),
-                    ),
-                  ),
+            Expanded(child: Observer(
+              builder: (context) {
+                return ListView.builder(
+                  itemCount: widget.controller.imcList.length,
+                  itemBuilder: (context, index) {
+                    return Dismissible(
+                      onDismissed: (DismissDirection direction) async {
+                        widget.controller
+                            .delete(widget.controller.imcList[index]);
+                        show();
+                      },
+                      key:
+                          Key(widget.controller.imcList[index].nome.toString()),
+                      child: Card(
+                        color: Theme.of(context).primaryColor,
+                        child: ListTile(
+                          title: Text(
+                            widget.controller.imcList[index].nome ?? '',
+                            style: const TextStyle(
+                                fontSize: 20, color: Colors.white),
+                          ),
+                          trailing: Text(
+                            widget.controller.imcList[index].classificacao ??
+                                '',
+                            style: const TextStyle(
+                                fontSize: 16, color: Colors.white),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 );
               },
             ))
@@ -114,10 +142,10 @@ class _HomePageState extends State<HomePage> {
       double.parse(peso.text),
       double.parse(altura.text),
     );
-    imcs = widget.controller.imcList;
+
     peso.text = '';
     nome.text = '';
     altura.text = '';
-    setState(() {});
+    show();
   }
 }
